@@ -63,14 +63,8 @@
       indicator: true // indicator setting
    });
 
-  $('#carousel_2_prev').on('click', function(ev) {
-    ev.preventDefault();
-    $carousel.carouselPrev();
-  });
-  $('#carousel_2_next').on('click', function(ev) {
-    ev.preventDefault();
-    $carousel.carouselNext();
-  });
+   // ...
+
 }());</pre>
 
 	<h2>group with indicator</h2>
@@ -125,14 +119,9 @@
     $carousel.append('&lt;div class="carousel_box"&gt;' + (++num) + '&lt;/div&gt;');
     $carousel.carouselRefresh();
   });
-  $('#carousel_4_prev').on('click', function(ev) {
-    ev.preventDefault();
-    $carousel.carouselPrev();
-  });
-  $('#carousel_4_next').on('click', function(ev) {
-    ev.preventDefault();
-    $carousel.carouselNext();
-  });
+
+  // ...
+
 }());</pre>
 
 	<h2>Other options and events</h2>
@@ -155,14 +144,7 @@
     duration: 0.5 // move duration
   });
 
-  $('#carousel_5_prev').on('click', function(ev) {
-    ev.preventDefault();
-    $carousel.carouselPrev();
-  });
-  $('#carousel_5_next').on('click', function(ev) {
-    ev.preventDefault();
-    $carousel.carouselNext();
-  });
+  // ...
 
   $carousel.bind({
     'Carousel.next': function() {
