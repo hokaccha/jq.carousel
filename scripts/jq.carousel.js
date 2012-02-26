@@ -142,7 +142,7 @@
         return;
       }
       $indicator = self.$indicator;
-      self.bind({
+      self._bind({
         'Carousel.prev': function() {
           $indicator.indicatorActive();
         },
@@ -399,7 +399,7 @@
       }
     },
 
-    bind: function() {
+    _bind: function() {
       var self = this,
         a = arguments,
         c = undefined,
