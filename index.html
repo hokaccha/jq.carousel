@@ -95,23 +95,25 @@
 
 }());</pre>
 
-	<h2>reset and refresh carousel</h2>
+	<h2>reset and refresh carousel, and binding event</h2>
 	<div class="carousel">
 		<div id="carousel_4" class="carousel_inner">
 			<div class="carousel_box">1</div>
 		</div>
 		<p class="btns">
 			<input type="button" id="carousel_4_add" value="add">
-			<input type="button" id="carousel_4_prev" value="prev">
-			<input type="button" id="carousel_4_next" value="next">
+			<input type="button" id="carousel_4_prev" value="prev" disabled>
+			<input type="button" id="carousel_4_next" value="next" disabled>
 		</p
 	</div>
 	<h3>source code</h3>
 	<pre>(function() {
   var $carousel = $('#carousel_4').carousel({
-      indicator: true,
-      group: 4
+      group: 4,
+      indicator: true
     }),
+    $prev = $('#carousel_4_prev'),
+    $next = $('#carousel_4_next'),
     num = 1;
 
   $('#carousel_4_add').on('click', function(ev) {
@@ -122,6 +124,13 @@
 
   // ...
 
+  $carousel.bind('Carousel.refresh', function() {
+    if ( !$carousel.carouselGetMoveState() ) {
+      return;
+    }
+    $prev.prop('disabled', '');
+    $next.prop('disabled', '');
+  });
 }());</pre>
 
 	<h2>Other options and events</h2>
@@ -212,6 +221,8 @@
 			group: 4,
 			indicator: true
 		}),
+		$prev = $('#carousel_4_prev'),
+		$next = $('#carousel_4_next'),
 		num = 1;
 
 	$('#carousel_4_add').on('click', function(ev) {
@@ -219,13 +230,21 @@
 		$carousel.append('<div class="carousel_box">' + (++num) + '</div>');
 		$carousel.carouselRefresh();
 	});
-	$('#carousel_4_prev').on('click', function(ev) {
+	$prev.on('click', function(ev) {
 		ev.preventDefault();
 		$carousel.carouselPrev();
 	});
-	$('#carousel_4_next').on('click', function(ev) {
+	$next.on('click', function(ev) {
 		ev.preventDefault();
 		$carousel.carouselNext();
+	});
+
+	$carousel.bind('Carousel.refresh', function() {
+		if ( !$carousel.carouselGetMoveState() ) {
+			return;
+		}
+		$prev.prop('disabled', '');
+		$next.prop('disabled', '');
 	});
 }());
 
