@@ -2,13 +2,13 @@
  * jq.carousel
  * Simple and customizable carousel
  *
- * @version      2.3
+ * @version      2.4
  * @author       nori (norimania@gmail.com)
  * @copyright    5509 (http://5509.me/)
  * @license      The MIT License
  * @link         https://github.com/5509/jq.carousel
  *
- * 2012-02-28 15:42
+ * 2012-03-04 22:51
  */
 ;(function($, undefined) {
 
@@ -25,6 +25,7 @@
       var self = this;
 
       self.conf = $.extend({
+        vertical : false,   // boolean
         loop     : true,    // boolean
         easing   : 'swing', // or custom easing
         start    : 1,       // int
@@ -45,12 +46,18 @@
 
     _build: function() {
       var self = this,
+        conf = self.conf,
         start_pos = 0,
-        box_total_width = 0;
+        box_total_size = 0;
 
-      self.view_width = self.$elem[0].offsetWidth;
-      self.total_width = 0;
-      self.current = self.conf.start;
+      self.offset_prop = self.conf.vertical ? 'offsetHeight' : 'offsetWidth';
+      self.float = conf.vertical ? 'none' : 'left';
+      self.position = conf.vertical ? 'top' : 'left';
+      self.prop = conf.vertical ? 'height' : 'width';
+
+      self.view_size = self.$elem[0][self.offset_prop];
+      self.total_size = 0;
+      self.current = conf.start;
 
       self.$items = self.$elem.find('.carousel_box');
       self.$items_original = self.$items.clone();
@@ -64,7 +71,7 @@
           )
       );
 
-      box_total_width = self.items_length * self.$items[0].offsetWidth;
+      box_total_size = self.items_length * self.$items[0][self.offset_prop];
 
       // setup
       each(self.$items, function(i) {
@@ -72,26 +79,26 @@
 
         item.carousel_id = i;
         item.$elem = $(this);
-        item.data_width = item.offsetWidth;
-        item.origWidth = item.$elem.css('width');
+        item.data_size = item[self.offset_prop];
+        item.orig_size = item.$elem.css(self.prop);
         item.$elem.css({
-          float: 'left'
+          float: self.float
         });
 
-        if ( self.items_len_hidden > self.view_width ) return;
-        self.items_len_hidden = self.items_len_hidden + item.data_width;
+        if ( self.items_len_hidden > self.view_size ) return;
+        self.items_len_hidden = self.items_len_hidden + item.data_size;
       });
-      self.item_width = self.$items.eq(0)[0].data_width;
-      self.items_len_hidden = self.items_len_hidden / self.item_width;
+      self.item_size = self.$items.eq(0)[0].data_size;
+      self.items_len_hidden = self.items_len_hidden / self.item_size;
 
-      if ( self.conf.group !== 1 ) {
+      if ( conf.group !== 1 ) {
         self._groupSetup();
-        if ( self.conf.loop ) {
+        if ( conf.loop ) {
           self._cloneGroup();
         }
       } else {
         // clone nodes
-        if ( self.conf.loop ) {
+        if ( conf.loop ) {
           self._cloneItem();
         }
       }
@@ -102,34 +109,39 @@
       });
 
       // carousel width and height
-      if ( self.conf.loop ) {
+      if ( conf.loop ) {
         start_pos = self.items_len_hidden + self.current - 1;
-        self.current_pos = -start_pos * self.item_width;
-        self.default_pos = -self.items_len_hidden * self.item_width;
+        self.current_pos = -start_pos * self.item_size;
+        self.default_pos = -self.items_len_hidden * self.item_size;
       } else {
-        start_pos = self.items_length < self.conf.start ? 1 : self.conf.start;
+        start_pos = self.items_length < conf.start ? 1 : conf.start;
         self.current_pos = 0;
         self.default_pos = 0;
       }
       self.$carousel_wrap.css({
-        position: 'absolute',
-        left: self.current_pos + 'px',
-        height: self.$items.eq(0)[0].offsetHeight
-      });
+        position: 'absolute'
+      })
+      .css(self.position, self.current_pos);
+      
+      if ( self.vertical ) {
+        self.$carousel_wrap.css('width', self.$items.eq(0)[0].offsetWidth);
+      } else {
+        self.$carousel_wrap.css('height', self.$items.eq(0)[0].offsetHeight);
+      }
 
       // max and min point
-      self.max_point = self.default_pos - (self.item_width * self.items_length);
+      self.max_point = self.default_pos - (self.item_size * self.items_length);
       self.min_point = self.default_pos;
 
       // move size
-      self.move_size = self.item_width;
+      self.move_size = self.item_size;
 
-      if ( self.conf.group === 1 ) {
+      if ( conf.group === 1 ) {
         self.$items = self.$carousel_wrap.find('.carousel_box');
       } else {
         self.$items = self.$carousel_wrap.find('.carousel_group_inner');
       }
-      self._setWidth();
+      self._setSize();
       self.$elem.trigger('carousel.ready');
     },
 
@@ -160,7 +172,7 @@
         division = l / conf.group,
         group_length = Math.ceil(division),
         group = new Array(group_length),
-        group_width = self.item_width * conf.group;
+        group_size = self.item_size * conf.group;
 
       for ( ; i < l; i++ ) {
         if ( i !== 0 && i % conf.group === 0 ) {
@@ -168,10 +180,9 @@
         }
         if ( !group[k] ) {
           group[k] = $('<div class="carousel_group_inner"></div>');
-          group[k].css({
-            float: 'left',
-            width: group_width
-          });
+          group[k]
+            .css('float', self.float)
+            .css(self.prop, group_size);
         }
         group[k].append(self.$items.eq(i));
       }
@@ -181,7 +192,7 @@
       self.$items = self.$carousel_wrap.find('.carousel_group_inner');
       self.items_length = self.$items.length;
       self.items_len_hidden = 1;
-      self.item_width = self.item_width * conf.group;
+      self.item_size = self.item_size * conf.group;
     },
 
     // returns first and last items
@@ -229,7 +240,7 @@
     },
 
     // refresh totalWitdh
-    _getWidth: function(index) {
+    _getSize: function(index) {
       var self = this,
         $items = undefined;
 
@@ -239,30 +250,29 @@
         $items = self.$elem.find('.carousel_group_inner');
       }
 
-      self.total_width = 0;
+      self.total_size = 0;
       each($items, function(i) {
         var item = this;
 
-        item.data_width = item.offsetWidth;
+        item.data_size = item[self.offset_prop];
         // set total_width
-        self.total_width = self.total_width + item.data_width;
+        self.total_size = self.total_size + item.data_size;
       });
     },
 
-    _setWidth: function() {
+    _setSize: function() {
       var self = this;
-      self._getWidth();
-      self.$carousel_wrap.css({
-        width: self.total_width
-      });
+      self._getSize();
+      self.$carousel_wrap
+        .css(self.prop, self.total_size);
     },
 
     _moveState: function() {
       var self = this,
-        view_width = self.view_width,
-        items_block_width = self.items_length * self.item_width;
+        view_size = self.view_size,
+        items_block_size = self.items_length * self.item_size;
 
-      if ( items_block_width <= view_width ) {
+      if ( items_block_size <= view_size ) {
         return false;
       } else
       if ( self.current === self.items_length ) {
@@ -323,11 +333,11 @@
 
       self.current_pos = self.current_pos - self.move_size;
       if ( self.current_pos < self.max_point ) {
-        self.$carousel_wrap.css('left', self.default_pos);
+        self.$carousel_wrap.css(self.position, self.default_pos);
         self.current_pos = self.default_pos - self.move_size;
       }
 
-      prop.left = self.current_pos;
+      prop[self.position] = self.current_pos;
 
       self.$carousel_wrap
       .animate(prop, {
@@ -345,7 +355,7 @@
         conf = self.conf,
         hidden_len = self.items_len_hidden,
         total_length = self.items_length + hidden_len,
-        items_width = self.item_width * self.items_length,
+        items_size = self.item_size * self.items_length,
         prop = {};
 
       if ( !self.conf.loop && self.current === 1 ) {
@@ -355,11 +365,11 @@
 
       self.current_pos = self.current_pos + self.move_size;
       if ( self.default_pos < self.current_pos ) {
-        self.$carousel_wrap.css('left', -self.item_width * total_length);
-        self.current_pos = self.default_pos - items_width + self.move_size;
+        self.$carousel_wrap.css(self.position, -self.item_size * total_length);
+        self.current_pos = self.default_pos - items_size + self.move_size;
       }
 
-      prop.left = self.current_pos;
+      prop[self.position] = self.current_pos;
 
       self.$carousel_wrap
       .animate(prop, {
@@ -456,7 +466,7 @@
 
     refresh: function() {
       var self = this;
-      self.total_width = 0;
+      self.total_size = 0;
       self._build();
       self._setIndicator();
 
@@ -537,15 +547,14 @@
 
   // $.fn extend
   jQuery.fn.carousel = function(conf, arguments) {
-    var $this = this, 
-      carousel = this.data('carousel');
+    var carousel = this.data('carousel');
 
     if ( carousel ) {
       return carousel._callAPI(conf, arguments);
     } else {
-      carousel = Carousel($this, conf);
-      $this.data('carousel', carousel);
-      return $this;
+      carousel = Carousel(this, conf);
+      this.data('carousel', carousel);
+      return this;
     }
   };
 

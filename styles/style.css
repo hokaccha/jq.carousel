@@ -84,6 +84,15 @@ header nav {
   left: 0;
   background: rgba(37, 37, 37, 0.9);
   line-height: 40px;
+  z-index: 100;
+  -webkit-transition: background-color ease 0.2s;
+  -moz-transition: background-color ease 0.2s;
+  -ms-transition: background-color ease 0.2s;
+  -o-transition: background-color ease 0.2s;
+  transition: background-color ease 0.2s;
+}
+header nav.fixscroll_fixed {
+  background: rgba(37, 37, 37, 0.7);
 }
 header nav ul {
   margin: 0 auto;
@@ -256,4 +265,22 @@ section ul li a:hover {
 
 .thx {
   text-align: right;
+}
+
+#carousel_9 {
+  margin: 0 auto;
+  width: 150px;
+  height: 300px;
+  background: #efefef;
+  overflow: hidden;
+}
+#carousel_9 .carousel_box {
+  border: solid #fff 5px;
+  width: 140px;
+  height: 140px;
+  color: #fff;
+  background: #252525;
+  line-height: 140px;
+  text-align: center;
+  font-size: 123%;
 }
